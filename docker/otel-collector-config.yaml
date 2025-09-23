@@ -1,0 +1,73 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  resource:
+    attributes:
+      - key: service.namespace
+        value: potato-pipeline
+        action: upsert
+      - key: deployment.environment
+        value: local
+        action: upsert
+
+  memory_limiter:
+    limit_mib: 512
+
+exporters:
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tenant_id: ""
+    labels:
+      resource:
+        service.name: "service_name"
+        service.namespace: "service_namespace"
+      attributes:
+        severity: "severity"
+        job: "job"
+    
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: potato_pipeline
+    const_labels:
+      environment: local
+
+  jaeger:
+    endpoint: jaeger:14250
+    tls:
+      insecure: true
+
+  logging:
+    loglevel: info
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [jaeger, logging]
+
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [prometheus, logging]
+
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [loki, logging]
+
+  extensions: []
+  telemetry:
+    logs:
+      level: "info"

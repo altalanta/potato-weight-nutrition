@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: potato-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8889:8889"   # Prometheus metrics
+    depends_on:
+      - loki
+      - jaeger
+    networks:
+      - observability
+
+  # Loki for logs
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: potato-loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
+    networks:
+      - observability
+
+  # Jaeger for traces
+  jaeger:
+    image: jaegertracing/all-in-one:1.51
+    container_name: potato-jaeger
+    ports:
+      - "14250:14250"   # gRPC
+      - "16686:16686"   # Web UI
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - observability
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: potato-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - observability
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: potato-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - observability
+
+volumes:
+  grafana_data:
+  prometheus_data:
+  loki_data:
+
+networks:
+  observability:
+    driver: bridge
