@@ -1,0 +1,39 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 5000
+  adminConnectors:
+    - type: http
+      port: 5001
+
+database:
+  driverClass: org.postgresql.Driver
+  url: ${MARQUEZ_DATABASE_URL}
+  user: ${MARQUEZ_DATABASE_USER}
+  password: ${MARQUEZ_DATABASE_PASSWORD}
+  
+  # Connection pool settings
+  maxWaitForConnection: 1s
+  validationQuery: SELECT 1
+  validationQueryTimeout: 3s
+  minSize: 8
+  maxSize: 32
+  checkConnectionWhileIdle: false
+  evictionInterval: 10s
+  minIdleTime: 1 minute
+
+logging:
+  level: INFO
+  loggers:
+    marquez: INFO
+    org.postgresql: WARN
+  appenders:
+    - type: console
+      threshold: INFO
+      timeZone: UTC
+      target: stdout
+      logFormat: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Flyway database migration settings
+flyway:
+  cleanDisabled: false

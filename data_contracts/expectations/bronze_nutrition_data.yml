@@ -1,0 +1,197 @@
+# Great Expectations Data Contract: Bronze Nutrition Data
+# Raw nutrition data from CSV files before cleaning
+
+expectation_suite_name: bronze_nutrition_data
+data_asset_type: pandas
+
+expectations:
+  # Table-level expectations
+  - expectation_type: expect_table_row_count_to_be_between
+    kwargs:
+      min_value: 1
+      max_value: 100000
+    meta:
+      notes: "Bronze nutrition data should have reasonable number of rows"
+
+  - expectation_type: expect_table_columns_to_match_set
+    kwargs:
+      column_set:
+        - id
+        - date
+        - food_desc
+        - calories
+        - fiber_g
+        - protein_g
+        - fat_g
+        - carbs_g
+      exact_match: false
+    meta:
+      notes: "Core nutrition columns must be present"
+
+  # Column-level expectations: ID
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: id
+    meta:
+      notes: "Subject ID is required for all records"
+
+  - expectation_type: expect_column_values_to_match_regex
+    kwargs:
+      column: id
+      regex: "^[A-Z0-9_]+$"
+    meta:
+      notes: "Subject IDs should be alphanumeric with underscores"
+
+  # Column-level expectations: Date
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: date
+    meta:
+      notes: "Date is required for temporal analysis"
+
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: date
+      type_: datetime64
+    meta:
+      notes: "Date must be proper datetime type"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: date
+      min_value: "2020-01-01"
+      max_value: "2030-12-31"
+      parse_strings_as_datetimes: true
+    meta:
+      notes: "Dates should be within reasonable study period"
+
+  # Column-level expectations: Calories
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: calories
+    meta:
+      notes: "Calorie data is essential for analysis"
+
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: calories
+      type_: float64
+    meta:
+      notes: "Calories must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: calories
+      min_value: 0
+      max_value: 10000
+    meta:
+      notes: "Daily calories should be biologically plausible"
+
+  # Column-level expectations: Fiber
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: fiber_g
+      type_: float64
+    meta:
+      notes: "Fiber must be numeric when present"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: fiber_g
+      min_value: 0
+      max_value: 200
+      mostly: 0.95
+    meta:
+      notes: "Fiber intake should be reasonable (allow some missing/extreme values)"
+
+  # Column-level expectations: Protein
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: protein_g
+      type_: float64
+    meta:
+      notes: "Protein must be numeric when present"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: protein_g
+      min_value: 0
+      max_value: 500
+      mostly: 0.95
+    meta:
+      notes: "Protein intake should be reasonable"
+
+  # Column-level expectations: Fat
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: fat_g
+      type_: float64
+    meta:
+      notes: "Fat must be numeric when present"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: fat_g
+      min_value: 0
+      max_value: 300
+      mostly: 0.95
+    meta:
+      notes: "Fat intake should be reasonable"
+
+  # Column-level expectations: Food Description
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: food_desc
+      mostly: 0.8
+    meta:
+      notes: "Most records should have food descriptions"
+
+  - expectation_type: expect_column_value_lengths_to_be_between
+    kwargs:
+      column: food_desc
+      min_value: 2
+      max_value: 500
+      mostly: 0.95
+    meta:
+      notes: "Food descriptions should be reasonable length"
+
+  # Business logic expectations
+  - expectation_type: expect_column_pair_values_A_to_be_greater_than_B
+    kwargs:
+      column_A: calories
+      column_B: protein_g
+      or_equal: true
+      mostly: 0.95
+    meta:
+      notes: "Calories should generally exceed protein grams (4 kcal/g protein)"
+
+  # Data freshness (for production use)
+  - expectation_type: expect_column_max_to_be_between
+    kwargs:
+      column: date
+      min_value: "2024-01-01"
+      max_value: "2025-12-31"
+      parse_strings_as_datetimes: true
+    meta:
+      notes: "Most recent data should be from current study period"
+
+meta:
+  great_expectations_version: "0.18.8"
+  data_asset_name: bronze_nutrition_data
+  expectation_suite_description: |
+    Data contract for raw nutrition data input from CSV files.
+    
+    This suite validates the structure and basic quality of nutritional intake data
+    before any cleaning or transformation. It ensures:
+    
+    1. Required columns are present
+    2. Data types are correct
+    3. Values are within biologically plausible ranges
+    4. Temporal data is consistent
+    5. Core business logic is satisfied
+    
+    Violations of these expectations indicate upstream data quality issues
+    that need to be addressed before pipeline processing.
+  
+  data_context_id: potato-weight-nutrition
+  suite_creation_date: "2024-09-23"

@@ -1,0 +1,269 @@
+# Great Expectations Data Contract: Silver Features
+# Cleaned and engineered features ready for modeling
+
+expectation_suite_name: silver_features
+data_asset_type: pandas
+
+expectations:
+  # Table-level expectations
+  - expectation_type: expect_table_row_count_to_be_between
+    kwargs:
+      min_value: 1
+      max_value: 50000
+    meta:
+      notes: "Silver features should have fewer rows than bronze (aggregated by week)"
+
+  - expectation_type: expect_table_columns_to_match_set
+    kwargs:
+      column_set:
+        - subject_id
+        - study_week
+        - delta_kg_next
+        - fiber_per_1000kcal
+        - calories_week
+        - potato_week
+        - beans_week
+        - weight_kg_baseline
+        - weight_kg_current
+      exact_match: false
+    meta:
+      notes: "Core modeling features must be present"
+
+  # Subject ID
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: subject_id
+    meta:
+      notes: "Subject ID required for all feature records"
+
+  - expectation_type: expect_column_values_to_match_regex
+    kwargs:
+      column: subject_id
+      regex: "^[A-Z0-9_]+$"
+    meta:
+      notes: "Subject IDs should be clean alphanumeric identifiers"
+
+  # Study Week
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: study_week
+    meta:
+      notes: "Study week is required for temporal modeling"
+
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: study_week
+      type_: int64
+    meta:
+      notes: "Study week must be integer"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: study_week
+      min_value: 1
+      max_value: 52
+    meta:
+      notes: "Study weeks should be within 1-52 range"
+
+  # Target Variable: Weight Change
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: delta_kg_next
+      type_: float64
+    meta:
+      notes: "Weight change must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: delta_kg_next
+      min_value: -10.0
+      max_value: 10.0
+      mostly: 0.95
+    meta:
+      notes: "Weekly weight changes should be biologically plausible"
+
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: delta_kg_next
+      mostly: 0.8
+    meta:
+      notes: "Most records should have weight change data"
+
+  # Feature: Fiber per 1000 kcal
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: fiber_per_1000kcal
+      type_: float64
+    meta:
+      notes: "Fiber density must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: fiber_per_1000kcal
+      min_value: 0
+      max_value: 100
+      mostly: 0.95
+    meta:
+      notes: "Fiber per 1000 kcal should be reasonable"
+
+  # Feature: Weekly Calories
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: calories_week
+      type_: float64
+    meta:
+      notes: "Weekly calories must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: calories_week
+      min_value: 5000
+      max_value: 30000
+      mostly: 0.9
+    meta:
+      notes: "Weekly calorie intake should be reasonable (700-4300 kcal/day)"
+
+  # Feature: Potato Weeks (Binary)
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: potato_week
+      type_: int64
+    meta:
+      notes: "Potato week indicator must be integer"
+
+  - expectation_type: expect_column_values_to_be_in_set
+    kwargs:
+      column: potato_week
+      value_set: [0, 1]
+    meta:
+      notes: "Potato week must be binary (0 or 1)"
+
+  # Feature: Beans Weeks (Binary)
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: beans_week
+      type_: int64
+    meta:
+      notes: "Beans week indicator must be integer"
+
+  - expectation_type: expect_column_values_to_be_in_set
+    kwargs:
+      column: beans_week
+      value_set: [0, 1]
+    meta:
+      notes: "Beans week must be binary (0 or 1)"
+
+  # Weight Measurements
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: weight_kg_baseline
+      type_: float64
+    meta:
+      notes: "Baseline weight must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: weight_kg_baseline
+      min_value: 30.0
+      max_value: 300.0
+    meta:
+      notes: "Baseline weights should be biologically plausible"
+
+  - expectation_type: expect_column_values_to_be_of_type
+    kwargs:
+      column: weight_kg_current
+      type_: float64
+    meta:
+      notes: "Current weight must be numeric"
+
+  - expectation_type: expect_column_values_to_be_between
+    kwargs:
+      column: weight_kg_current
+      min_value: 30.0
+      max_value: 300.0
+    meta:
+      notes: "Current weights should be biologically plausible"
+
+  # Business Logic Expectations
+  - expectation_type: expect_column_pair_values_to_be_equal
+    kwargs:
+      column_A: delta_kg_next
+      column_B: weight_kg_current
+      mostly: 0.1  # This should rarely be exactly equal
+    meta:
+      notes: "Weight change should not exactly equal current weight (sanity check)"
+
+  # Data completeness for modeling
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: fiber_per_1000kcal
+      mostly: 0.7
+    meta:
+      notes: "Most modeling records should have fiber density calculated"
+
+  - expectation_type: expect_column_values_to_not_be_null
+    kwargs:
+      column: calories_week
+      mostly: 0.8
+    meta:
+      notes: "Most modeling records should have weekly calorie data"
+
+  # Statistical properties
+  - expectation_type: expect_column_mean_to_be_between
+    kwargs:
+      column: delta_kg_next
+      min_value: -2.0
+      max_value: 2.0
+    meta:
+      notes: "Average weekly weight change should be small"
+
+  - expectation_type: expect_column_stdev_to_be_between
+    kwargs:
+      column: delta_kg_next
+      min_value: 0.1
+      max_value: 5.0
+    meta:
+      notes: "Weight change variance should be reasonable"
+
+  # Feature correlation sanity checks
+  - expectation_type: expect_column_quantile_values_to_be_between
+    kwargs:
+      column: fiber_per_1000kcal
+      quantile: 0.5  # median
+      min_value: 5.0
+      max_value: 50.0
+    meta:
+      notes: "Median fiber density should be reasonable"
+
+meta:
+  great_expectations_version: "0.18.8"
+  data_asset_name: silver_features
+  expectation_suite_description: |
+    Data contract for engineered features ready for statistical modeling.
+    
+    This suite validates the silver layer data that serves as input to
+    the statistical models. It ensures:
+    
+    1. All required modeling features are present and properly typed
+    2. Feature values are within expected ranges
+    3. Binary indicators are properly encoded
+    4. Target variable (weight change) is available and reasonable
+    5. Data completeness meets modeling requirements
+    6. Statistical properties are sensible
+    
+    Violations indicate feature engineering issues or data quality problems
+    that could compromise model training and inference.
+    
+    Critical for:
+    - OLS regression with cluster-robust standard errors
+    - Within-subject fixed effects models  
+    - Mixed effects models
+    - Nonparametric comparisons
+  
+  data_context_id: potato-weight-nutrition
+  suite_creation_date: "2024-09-23"
+  model_dependencies:
+    - ols_cluster_robust
+    - fixed_effects
+    - mixed_effects
+    - nonparametric_tests

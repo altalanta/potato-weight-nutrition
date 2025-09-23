@@ -1,8 +1,44 @@
 # Potato Weight-Nutrition Analysis Pipeline
 
-A complete, reproducible data science pipeline for analyzing weight change patterns in relation to dietary fiber intake and specific food categories (potatoes, beans, etc.).
+<!-- Badges -->
+[![CI](https://github.com/example/potato-weight-nutrition/workflows/CI/badge.svg)](https://github.com/example/potato-weight-nutrition/actions/workflows/ci.yml)
+[![Security](https://github.com/example/potato-weight-nutrition/workflows/Security/badge.svg)](https://github.com/example/potato-weight-nutrition/actions/workflows/security.yml)
+[![Reproducible Run](https://github.com/example/potato-weight-nutrition/workflows/Reproducible%20Run/badge.svg)](https://github.com/example/potato-weight-nutrition/actions/workflows/repro.yml)
+[![codecov](https://codecov.io/gh/example/potato-weight-nutrition/branch/main/graph/badge.svg)](https://codecov.io/gh/example/potato-weight-nutrition)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+A production-ready, reproducible data science pipeline for analyzing weight change patterns in relation to dietary fiber intake and specific food categories, with full observability, lineage tracking, and automated deployment to AWS.
 
+![Teaser Plot](reports/figs/teaser.png)
+
+## 🚀 Quick Start
+
+### Quickstart (Local)
+```bash
+# 1. Setup environment
+make setup
+
+# 2. Generate teaser plot  
+make teaser
+
+# 3. Start observability stack
+make obs.up
+
+# 4. Run full pipeline with lineage tracking
+make repro
+```
+
+### Quickstart (AWS Minimal)
+```bash
+# 1. Deploy infrastructure
+make infra.apply
+
+# 2. Configure GitHub secrets with Terraform outputs
+make infra.output
+
+# 3. Push to trigger deployment
+git push origin main
+```
 
 ## Pipeline Overview
 
@@ -160,6 +196,174 @@ The pipeline extracts these food categories using case-insensitive regex with wo
 - **Logging**: loguru for structured logging
 - **Testing**: pytest with comprehensive coverage
 - **CI/CD**: GitHub Actions, pre-commit hooks
+
+## 🏗️ Infrastructure & Deployment
+
+### AWS Infrastructure
+- **S3 Data Lake**: Bronze/silver/gold layers with lifecycle policies
+- **MLflow Backend**: DynamoDB for metadata, S3 for artifacts
+- **IAM Security**: GitHub OIDC, least-privilege roles
+- **Monitoring**: CloudWatch integration
+
+```bash
+# Deploy infrastructure
+make infra.plan
+make infra.apply
+
+# Environment variables generated automatically
+make infra.env
+```
+
+### GitHub Actions Workflows
+- **CI**: Linting, testing, security scanning, coverage
+- **Security**: Bandit, pip-audit, secret scanning
+- **Reproducible Run**: Nightly pipeline validation
+- **Infrastructure**: Terraform plan/apply with OIDC
+
+## 📊 Observability & Lineage
+
+### Real-time Monitoring
+- **Grafana Dashboards**: Pipeline metrics, data quality, SLO tracking
+- **Structured Logging**: JSON logs with correlation IDs
+- **Distributed Tracing**: End-to-end request tracking
+- **Alerting**: PagerDuty integration for critical issues
+
+### Data Lineage
+- **OpenLineage**: Automatic lineage collection
+- **Marquez**: Visual data flow graphs
+- **Schema Evolution**: Track data contract changes
+- **Impact Analysis**: Downstream dependency mapping
+
+```bash
+# Start observability stack
+make obs.up     # Grafana: http://localhost:3000
+
+# Start lineage tracking  
+make lineage.up # Marquez: http://localhost:3000
+```
+
+### Data Contracts & Quality
+- **Great Expectations**: Automated data validation
+- **Schema Contracts**: Bronze and silver layer validation
+- **Quality Gates**: CI/CD pipeline integration
+- **Anomaly Detection**: Statistical drift monitoring
+
+```bash
+# Validate data contracts
+make contracts.validate
+
+# Available expectations:
+# - data_contracts/expectations/bronze_nutrition_data.yml
+# - data_contracts/expectations/silver_features.yml
+```
+
+## 🔒 Security & PHI
+
+### Data Classification
+- **Current Status**: No PHI/PII - synthetic data only
+- **Security Posture**: Production-ready controls
+- **Access Control**: Role-based permissions (Reader/Writer/Admin)
+- **Encryption**: At rest (S3, DynamoDB) and in transit (TLS 1.2+)
+
+### Authentication & Authorization
+- **GitHub OIDC**: No long-lived AWS keys
+- **Least Privilege**: Granular IAM policies
+- **Multi-Environment**: Dev/staging/prod isolation
+- **Audit Logging**: CloudTrail + application logs
+
+See [Security Documentation](ops/security-notes.md) for detailed policies.
+
+## 📋 Operations
+
+### Reproducible Run
+```bash
+# Complete end-to-end validation
+make repro
+
+# Generates:
+# - reports/repro_run/index.md
+# - reports/repro_run/metrics.json
+# - Observability dashboards
+# - Lineage graphs
+```
+
+### System Health
+- **SLO**: Silver data freshness < 2 hours
+- **Monitoring**: Pipeline success rate > 95%
+- **Performance**: p95 task latency < 5 minutes
+- **Capacity**: Auto-scaling based on data volume
+
+### Runbook & Troubleshooting
+- [Operational Runbook](ops/runbook.md) - Incident response procedures
+- [System Architecture](ops/system-diagram.md) - Component diagrams
+- [Security Notes](ops/security-notes.md) - Security policies
+
+## 🛠️ Available Commands
+
+### Development
+```bash
+make setup          # Install dependencies
+make test           # Run test suite  
+make lint           # Code quality checks
+make teaser         # Generate demo plot
+make run            # Run pipeline
+```
+
+### Infrastructure
+```bash
+make infra.init     # Initialize Terraform
+make infra.plan     # Plan infrastructure changes
+make infra.apply    # Deploy to AWS
+make infra.destroy  # Cleanup resources
+make infra.output   # Show deployed resources
+```
+
+### Observability
+```bash
+make obs.up         # Start Grafana, Prometheus, Loki
+make obs.down       # Stop observability stack
+make lineage.up     # Start Marquez lineage tracking
+make contracts.validate  # Run data quality checks
+```
+
+### Reproducibility
+```bash
+make repro          # Full reproducible run
+make check          # Lint + test
+make all            # Setup + teaser + run + test
+```
+
+## 📈 System Architecture
+
+```
+GitHub Actions → AWS (OIDC) → S3 Data Lake + MLflow + DynamoDB
+       ↓                           ↓
+   CI/CD Pipeline              Pipeline Processing
+       ↓                           ↓  
+ Security Scanning          OpenTelemetry + Lineage
+       ↓                           ↓
+   Infrastructure            Grafana + Marquez Dashboards
+```
+
+![System Diagram](ops/system-diagram.png)
+
+## 🔗 Links & Resources
+
+### Documentation
+- **[Reproducible Run](reports/repro_run/index.md)** - Latest pipeline execution
+- **[Infrastructure Guide](infra/terraform/README.md)** - AWS deployment
+- **[Lineage Demo](openlineage/lineage-demo.md)** - Data flow tracking
+- **[Security Policies](ops/security-notes.md)** - Data protection
+
+### Dashboards (Local Development)
+- **[Grafana](http://localhost:3000)** - Pipeline observability
+- **[Marquez](http://localhost:3000)** - Data lineage (different stack)
+- **[Prometheus](http://localhost:9090)** - Metrics storage
+- **[Jaeger](http://localhost:16686)** - Distributed tracing
+
+### External
+- **[Codecov Dashboard](https://codecov.io/gh/example/potato-weight-nutrition)** - Test coverage
+- **[GitHub Actions](https://github.com/example/potato-weight-nutrition/actions)** - CI/CD status
 
 ## Contributing
 
