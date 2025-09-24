@@ -8,10 +8,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A production-ready, reproducible data science pipeline for analyzing weight change patterns in relation to dietary fiber intake and specific food categories, with full observability, lineage tracking, and automated deployment to AWS.
+<img width="4771" height="3543" alt="potato_diet_teaser" src="https://github.com/user-attachments/assets/1589cef2-caa2-4a25-98bf-d9e98abbd9ea" />
 
-![Teaser Plot](reports/figs/teaser.png)
 
-## 🚀 Quick Start
+
+## Quick Start
 
 ### Quickstart (Local)
 ```bash
@@ -220,7 +221,7 @@ make infra.env
 - **Reproducible Run**: Nightly pipeline validation
 - **Infrastructure**: Terraform plan/apply with OIDC
 
-## 📊 Observability & Lineage
+## Observability & Lineage
 
 ### Real-time Monitoring
 - **Grafana Dashboards**: Pipeline metrics, data quality, SLO tracking
@@ -257,7 +258,7 @@ make contracts.validate
 # - data_contracts/expectations/silver_features.yml
 ```
 
-## 🔒 Security & PHI
+## Security & PHI
 
 ### Data Classification
 - **Current Status**: No PHI/PII - synthetic data only
@@ -273,7 +274,7 @@ make contracts.validate
 
 See [Security Documentation](ops/security-notes.md) for detailed policies.
 
-## 📋 Operations
+## Operations
 
 ### Reproducible Run
 ```bash
@@ -298,7 +299,7 @@ make repro
 - [System Architecture](ops/system-diagram.md) - Component diagrams
 - [Security Notes](ops/security-notes.md) - Security policies
 
-## 🛠️ Available Commands
+## Available Commands
 
 ### Development
 ```bash
@@ -333,7 +334,7 @@ make check          # Lint + test
 make all            # Setup + teaser + run + test
 ```
 
-## 📈 System Architecture
+## System Architecture
 
 ```
 GitHub Actions → AWS (OIDC) → S3 Data Lake + MLflow + DynamoDB
@@ -347,7 +348,7 @@ GitHub Actions → AWS (OIDC) → S3 Data Lake + MLflow + DynamoDB
 
 ![System Diagram](ops/system-diagram.png)
 
-## 🔗 Links & Resources
+## Links & Resources
 
 ### Documentation
 - **[Reproducible Run](reports/repro_run/index.md)** - Latest pipeline execution
