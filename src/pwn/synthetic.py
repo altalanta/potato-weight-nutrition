@@ -186,7 +186,7 @@ def _generate_fiber_data(n_subjects: int, n_weeks: int) -> pd.DataFrame:
             days = np.random.choice(7, size=n_days, replace=False)
             
             for day in days:
-                date = base_date + timedelta(weeks=week-1, days=day)
+                date = base_date + timedelta(weeks=week-1, days=int(day))
                 
                 # Daily totals with realistic ranges
                 total_calories = np.random.uniform(1200, 3000)

@@ -5,15 +5,15 @@ help:  ## Show this help message
 	@grep -E '^[a-zA-Z_.-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
 
 setup:  ## Install dependencies and set up pre-commit hooks
-	pip install -r requirements.txt
+	pip install -e .[dev,viz,stats]
 	pre-commit install
 	@echo "Setup complete!"
 
 run:  ## Run the complete analysis pipeline
-	python -m potato_pipeline.cli pipeline
+	pwn features --input-dir data && pwn model --features-dir reports/analysis && pwn report --results-dir reports/analysis
 
 teaser:  ## Generate/refresh the teaser plot only
-	python -m potato_pipeline.cli teaser
+	pwn data synth --output-dir data && pwn features --input-dir data && pwn report --results-dir reports/analysis --teaser
 
 test:  ## Run tests
 	pytest tests/ -v
@@ -32,7 +32,7 @@ clean:  ## Clean up generated files
 	rm -rf build/ dist/ .pytest_cache/
 
 config:  ## Show current configuration
-	python -m potato_pipeline.cli print-config
+	pwn --help
 
 install:  ## Install package in development mode
 	pip install -e .
@@ -128,19 +128,8 @@ contracts.validate:  ## Run Great Expectations validation
 # Repro Management
 repro:  ## Run reproducible pipeline end-to-end with observability
 	@echo "🔬 Starting reproducible pipeline run..."
-	@$(MAKE) obs.up
-	@$(MAKE) lineage.up
-	@sleep 10  # Wait for services to be ready
-	@echo "🏃 Running pipeline with observability..."
-	@export OPENLINEAGE_URL=http://localhost:5000 && \
-	 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 && \
-	 PYTHONPATH=src python -m potato_pipeline.cli pipeline
-	@echo "📊 Generating reproducible run report..."
-	@mkdir -p reports/repro_run
-	@$(MAKE) infra.env || echo "⚠️  Infrastructure not deployed, skipping AWS env"
+	pwn repro --obs --lineage --output-dir reports/repro_run
 	@echo "✅ Reproducible run completed!"
-	@echo "📊 View results at: http://localhost:3000"
-	@echo "🔗 View lineage at: http://localhost:3000 (Marquez)"
 
 # Development helpers
 check: lint test  ## Run both linting and tests

@@ -167,30 +167,85 @@ def data_synth(ctx: click.Context, output_dir: Path, n_subjects: int, n_weeks: i
               default="data/", help="Input directory containing data files")
 @click.pass_context
 def data_validate(ctx: click.Context, input_dir: Path) -> None:
-    """Run Great Expectations contracts (if installed)."""
+    """Run data validation with Pydantic schemas and Great Expectations (if installed)."""
     logger = ctx.obj["logger"]
     run_id = generate_run_id()
     
     logger.info("Starting data validation", extra={"run_id": run_id})
     
+    from .schemas_simple import (
+        validate_dataframe_schema, 
+        TidyDataRecord, 
+        NutritionRecord, 
+        FiberDailyRecord
+    )
+    
+    validation_results = {"schema_validation": {}, "contracts_validation": {}}
+    
+    # Schema validation with Pydantic
+    data_files = [
+        ("Potato_tidy.csv", TidyDataRecord),
+        ("Potato_nutrition_rows.csv", NutritionRecord),
+        ("Potato_fiber_daily.csv", FiberDailyRecord)
+    ]
+    
+    for filename, schema_class in data_files:
+        file_path = input_dir / filename
+        if file_path.exists():
+            try:
+                df = pd.read_csv(file_path)
+                errors = validate_dataframe_schema(df, schema_class)
+                validation_results["schema_validation"][filename] = {
+                    "status": "valid" if not errors else "invalid",
+                    "errors": errors,
+                    "rows_checked": len(df)
+                }
+            except Exception as e:
+                validation_results["schema_validation"][filename] = {
+                    "status": "error",
+                    "error": str(e)
+                }
+        else:
+            validation_results["schema_validation"][filename] = {
+                "status": "missing",
+                "error": f"File not found: {file_path}"
+            }
+    
+    # Great Expectations validation (if available)
     try:
         import great_expectations as gx
         from .contracts import validate_data_contracts
         
-        validation_results = validate_data_contracts(input_dir)
-        
-        results = {
-            "run_id": run_id,
-            "status": "success",
-            "validation_results": validation_results
-        }
+        contracts_results = validate_data_contracts(input_dir)
+        validation_results["contracts_validation"] = contracts_results
         
     except ImportError:
-        results = {
-            "run_id": run_id,
+        validation_results["contracts_validation"] = {
             "status": "skipped",
             "message": "Great Expectations not installed. Install with: pip install pwn[contracts]"
         }
+    except Exception as e:
+        validation_results["contracts_validation"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Determine overall status
+    schema_errors = sum(1 for v in validation_results["schema_validation"].values() 
+                       if v["status"] in ["invalid", "error"])
+    
+    overall_status = "success" if schema_errors == 0 else "failed"
+    
+    results = {
+        "run_id": run_id,
+        "status": overall_status,
+        "validation_results": validation_results,
+        "summary": {
+            "files_validated": len(validation_results["schema_validation"]),
+            "schema_errors": schema_errors,
+            "contracts_available": validation_results["contracts_validation"].get("status") != "skipped"
+        }
+    }
     
     click.echo(json.dumps(results, indent=2))
     logger.info("Data validation completed", extra={"run_id": run_id})
