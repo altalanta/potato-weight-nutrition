@@ -1,0 +1,89 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "potato-weight-nutrition"
+dynamic = ["version"]
+description = "Reproducible pipeline for analyzing weight change vs diet patterns"
+authors = [{name = "Potato Weight Nutrition Team"}]
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+    "pyarrow>=12.0.0",
+]
+
+[project.optional-dependencies]
+viz = [
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+]
+stats = [
+    "statsmodels>=0.14.0",
+]
+obs = [
+    "opentelemetry-api>=1.15.0",
+    "opentelemetry-sdk>=1.15.0",
+    "opentelemetry-instrumentation>=0.36b0",
+    "prometheus-client>=0.16.0",
+]
+contracts = [
+    "great-expectations>=0.17.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+    "pre-commit>=3.0.0",
+    "pytest-xdist>=3.0.0",
+]
+
+[project.scripts]
+pwn = "pwn.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+write_to = "src/pwn/_version.py"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings  
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = ["E501"]  # line too long
+
+[tool.ruff.lint.isort]
+known-first-party = ["pwn"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
