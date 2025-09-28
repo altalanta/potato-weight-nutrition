@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-09-28T15:50:58.660802",
+  "pipeline_status": "success",
+  "models": {
+    "ols": {
+      "status": "success",
+      "observations": 436,
+      "r_squared": 0.020880772256978264,
+      "fiber_coefficient": -0.015989366714122627,
+      "fiber_p_value": 0.027431464037190656
+    },
+    "fe": {
+      "status": "success",
+      "observations": 436,
+      "r_squared": 0.025137396625282804,
+      "fiber_coefficient": -0.017722700498677024,
+      "fiber_p_value": 0.01903745882514629
+    }
+  },
+  "health": {
+    "models_run": 2,
+    "successful_models": 2,
+    "total_observations": 872
+  }
+}

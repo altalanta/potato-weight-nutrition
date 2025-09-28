@@ -1,0 +1,15 @@
+OLS Regression Results
+==================================================
+Observations: 436
+R-squared: 0.0209
+
+Coefficients:
+--------------------------------------------------
+intercept          -0.2499     1.6277     -0.154      0.878
+fiber_g_week       -0.0160     0.0072     -2.213      0.027
+calories_week       0.0003     0.0001      2.025      0.044
+beans_week         -0.4733     0.5532     -0.856      0.393
+potato_week         0.7817     0.5622      1.390      0.165
+
+Mean Squared Error: 32.7971
+Degrees of Freedom: 431

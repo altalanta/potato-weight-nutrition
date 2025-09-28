@@ -162,6 +162,16 @@ def _build_nutrition_weekly(fiber_df: pd.DataFrame) -> pd.DataFrame:
     # Ensure proper types
     fiber_df["date"] = pd.to_datetime(fiber_df["date"])
     
+    # Check if week column exists, otherwise create it from date
+    if "week" not in fiber_df.columns:
+        # Create week column from date (assuming start date is study week 1)
+        fiber_df = fiber_df.sort_values(["subject_id", "date"])
+        for subject_id in fiber_df["subject_id"].unique():
+            subject_mask = fiber_df["subject_id"] == subject_id
+            subject_dates = fiber_df.loc[subject_mask, "date"]
+            min_date = subject_dates.min()
+            fiber_df.loc[subject_mask, "week"] = ((subject_dates - min_date).dt.days // 7) + 1
+    
     # Group by subject and week
     weekly_agg = fiber_df.groupby(["subject_id", "week"]).agg({
         "total_calories": ["mean", "sum", "std", "count"],
@@ -211,6 +221,17 @@ def _extract_food_keywords(nutrition_df: pd.DataFrame) -> pd.DataFrame:
     
     # Ensure proper types
     nutrition_df["date"] = pd.to_datetime(nutrition_df["date"])
+    
+    # Check if week column exists, otherwise create it from date
+    if "week" not in nutrition_df.columns:
+        # Create week column from date (assuming start date is study week 1)
+        nutrition_df = nutrition_df.sort_values(["subject_id", "date"])
+        for subject_id in nutrition_df["subject_id"].unique():
+            subject_mask = nutrition_df["subject_id"] == subject_id
+            subject_dates = nutrition_df.loc[subject_mask, "date"]
+            if not subject_dates.empty:
+                min_date = subject_dates.min()
+                nutrition_df.loc[subject_mask, "week"] = ((subject_dates - min_date).dt.days // 7) + 1
     
     results = []
     
