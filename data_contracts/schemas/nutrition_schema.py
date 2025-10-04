@@ -5,8 +5,6 @@ Optional complement to Great Expectations - provides programmatic
 data validation with type hints and runtime checking.
 """
 
-from datetime import datetime
-from typing import Optional
 
 import pandas as pd
 import pandera as pa

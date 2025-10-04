@@ -1,15 +1,14 @@
 """Command line interface using Typer."""
 
 import sys
-from pathlib import Path
 
 import typer
 from loguru import logger
 
 from .config import get_config
-from .io import load_tidy, load_nutrition_rows, load_fiber_daily, save_text, save_table
-from .features import prepare_weight, prepare_daily, aggregate_weekly, align_weeks
-from .modeling import run_full_analysis, format_results_summary
+from .features import aggregate_weekly, align_weeks, prepare_daily, prepare_weight
+from .io import load_fiber_daily, load_nutrition_rows, load_tidy, save_table, save_text
+from .modeling import format_results_summary, run_full_analysis
 from .plotting import create_all_plots
 
 app = typer.Typer(help="Potato Weight-Nutrition Analysis Pipeline")
@@ -107,7 +106,7 @@ def pipeline() -> None:
         print(f"Figures saved to: {config.out_fig_dir}")
         
         if model_results:
-            print(f"\nKey Results:")
+            print("\nKey Results:")
             if 'spearman_correlation' in model_results:
                 print(f"  Fiber-weight correlation: {model_results['spearman_correlation']:.3f}")
             if 'ols_fiber_coef' in model_results:
@@ -168,7 +167,7 @@ def print_config() -> None:
     print(f"  Tidy CSV: {config.tidy_csv}")
     print(f"  Nutrition rows CSV: {config.nutrition_rows_csv}")
     print(f"  Fiber daily CSV: {config.fiber_daily_csv}")
-    print(f"Output directories:")
+    print("Output directories:")
     print(f"  Figures: {config.out_fig_dir}")
     print(f"  Analysis: {config.out_analysis_dir}")
     print()
