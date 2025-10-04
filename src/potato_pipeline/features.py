@@ -1,9 +1,7 @@
 """Feature engineering functions for weight and nutrition data."""
 
 import re
-from typing import Dict, Tuple
 
-import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 from loguru import logger
@@ -280,7 +278,7 @@ def aggregate_weekly(daily_df: pd.DataFrame) -> pd.DataFrame:
     return weekly_agg
 
 
-def align_weeks(weight_trajectories: pd.DataFrame, weekly_nutrition: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def align_weeks(weight_trajectories: pd.DataFrame, weekly_nutrition: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
     Align weight trajectories with weekly nutrition features by subject and week.
     Returns tuple of (weight_trajectories, weekly_nutrition, merged_analysis_df).

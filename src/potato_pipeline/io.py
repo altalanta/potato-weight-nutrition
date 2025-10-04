@@ -1,7 +1,6 @@
 """I/O utilities for loading and saving data."""
 
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
 import pyarrow as pa
@@ -107,7 +106,7 @@ def save_text(path: Path, text: str) -> None:
         logger.error(f"Error saving text to {path}: {e}")
 
 
-def save_table(df: pd.DataFrame, path_csv: Path, path_parquet: Optional[Path] = None) -> None:
+def save_table(df: pd.DataFrame, path_csv: Path, path_parquet: Path | None = None) -> None:
     """Save DataFrame to CSV and optionally Parquet."""
     try:
         # Create parent directories

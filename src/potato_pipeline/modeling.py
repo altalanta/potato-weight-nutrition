@@ -1,14 +1,12 @@
 """Statistical modeling functions for weight-nutrition associations."""
 
-from typing import Dict, Union, List, Optional
 
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from statsmodels.formula.api import ols
-from statsmodels.stats.outliers_influence import variance_inflation_factor
-from scipy import stats
 from loguru import logger
+from scipy import stats
+from statsmodels.formula.api import ols
 
 try:
     from statsmodels.regression.mixed_linear_model import MixedLM
@@ -18,7 +16,7 @@ except ImportError:
     logger.warning("Mixed effects models not available")
 
 
-def fit_ols_clustered(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float]]:
+def fit_ols_clustered(analysis_df: pd.DataFrame) -> dict[str, str | float]:
     """
     Fit OLS model with cluster-robust standard errors by subject.
     Model: delta_kg_next ~ fiber_g_week_mean + calories_kcal_week_mean + kw_beans + kw_potato + C(subject_id)
@@ -88,7 +86,7 @@ def fit_ols_clustered(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float]]
     return results
 
 
-def fit_within_subject_effects(analysis_df: pd.DataFrame) -> Dict[str, Union[float, List[float]]]:
+def fit_within_subject_effects(analysis_df: pd.DataFrame) -> dict[str, float | list[float]]:
     """
     Fit within-subject fixed effects by demeaning variables.
     Returns distribution of within-subject coefficients.
@@ -138,7 +136,7 @@ def fit_within_subject_effects(analysis_df: pd.DataFrame) -> Dict[str, Union[flo
     return results
 
 
-def fit_mixed_effects(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float]]:
+def fit_mixed_effects(analysis_df: pd.DataFrame) -> dict[str, str | float]:
     """
     Fit mixed effects model with random intercepts by subject.
     Handles convergence gracefully.
@@ -194,7 +192,7 @@ def fit_mixed_effects(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float]]
     return results
 
 
-def compute_correlations(analysis_df: pd.DataFrame) -> Dict[str, float]:
+def compute_correlations(analysis_df: pd.DataFrame) -> dict[str, float]:
     """Compute Spearman correlations between fiber and weight changes."""
     results = {}
     
@@ -229,7 +227,7 @@ def compute_correlations(analysis_df: pd.DataFrame) -> Dict[str, float]:
     return results
 
 
-def test_group_differences(analysis_df: pd.DataFrame) -> Dict[str, float]:
+def test_group_differences(analysis_df: pd.DataFrame) -> dict[str, float]:
     """
     Test differences between groups using Mann-Whitney U tests.
     Compare beans vs non-beans weeks, etc.
@@ -285,7 +283,7 @@ def test_group_differences(analysis_df: pd.DataFrame) -> Dict[str, float]:
     return results
 
 
-def run_full_analysis(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float, List[float]]]:
+def run_full_analysis(analysis_df: pd.DataFrame) -> dict[str, str | float | list[float]]:
     """
     Run complete statistical analysis pipeline.
     Returns combined results dictionary.
@@ -323,7 +321,7 @@ def run_full_analysis(analysis_df: pd.DataFrame) -> Dict[str, Union[str, float, 
     return all_results
 
 
-def format_results_summary(results: Dict[str, Union[str, float, List[float]]]) -> str:
+def format_results_summary(results: dict[str, str | float | list[float]]) -> str:
     """Format statistical results into human-readable summary."""
     
     lines = [
@@ -386,7 +384,7 @@ def format_results_summary(results: Dict[str, Union[str, float, List[float]]]) -
         lines.extend([
             "GROUP COMPARISONS (Mann-Whitney U)",
             "-" * 35,
-            f"Beans vs no-beans weeks:",
+            "Beans vs no-beans weeks:",
             f"  Beans median Δkg: {results['beans_median_delta']:.4f} (n={results.get('beans_n', 'N/A')})",
             f"  No-beans median Δkg: {results['no_beans_median_delta']:.4f} (n={results.get('no_beans_n', 'N/A')})",
             f"  p-value: {results['beans_vs_no_beans_p']:.4f}",
@@ -395,7 +393,7 @@ def format_results_summary(results: Dict[str, Union[str, float, List[float]]]) -
     
     if 'potato_vs_no_potato_p' in results:
         lines.extend([
-            f"Potato vs no-potato weeks:",
+            "Potato vs no-potato weeks:",
             f"  Potato median Δkg: {results['potato_median_delta']:.4f}",
             f"  No-potato median Δkg: {results['no_potato_median_delta']:.4f}",
             f"  p-value: {results['potato_vs_no_potato_p']:.4f}",

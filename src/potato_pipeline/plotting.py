@@ -1,7 +1,6 @@
 """Plotting functions using matplotlib for weight-nutrition analysis."""
 
 from pathlib import Path
-from typing import Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -351,7 +350,7 @@ def create_calories_multiples_plot(analysis_df: pd.DataFrame, output_path: Path,
 
 
 def create_all_plots(weight_trajectories: pd.DataFrame, analysis_df: pd.DataFrame, 
-                    output_dir: Path) -> Tuple[bool, int]:
+                    output_dir: Path) -> tuple[bool, int]:
     """
     Create all plots for the analysis.
     Returns tuple of (teaser_used_real_data, num_subject_plots_created).

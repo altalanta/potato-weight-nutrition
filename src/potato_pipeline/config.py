@@ -1,11 +1,10 @@
 """Configuration management using Pydantic."""
 
 from pathlib import Path
-from typing import Optional
 
 try:
-    from pydantic_settings import BaseSettings
     from pydantic import Field
+    from pydantic_settings import BaseSettings
 except ImportError:
     from pydantic import BaseSettings, Field
 from loguru import logger
